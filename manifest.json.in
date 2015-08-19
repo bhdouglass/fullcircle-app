@@ -1,0 +1,16 @@
+{
+    "name": "fullcircle.bhdouglass",
+    "description": "description of fullcircle",
+    "architecture": "@CLICK_ARCH@",
+    "title": "fullcircle",
+    "hooks": {
+        "fullcircle": {
+            "apparmor": "fullcircle/fullcircle.apparmor",
+            "desktop": "fullcircle/fullcircle.desktop",
+            "content-hub": "fullcircle/fullcircle-content-hub.json"
+        }
+    },
+    "version": "0.1",
+    "maintainer": "Brian Douglass <bhdouglass@gmail.com>",
+    "framework" : "ubuntu-sdk-15.04"
+}

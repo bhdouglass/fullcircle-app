@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=fullcircle
+Exec=qmlscene $@ fullcircle/Main.qml
+Icon=fullcircle/fullcircle.png
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true
+

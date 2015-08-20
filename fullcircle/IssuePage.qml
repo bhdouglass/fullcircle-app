@@ -103,7 +103,7 @@ Page {
             delegate: ListItem.Standard {
                 text: "Download: " + model.lang + " PDF"
                 progression: true
-                onClicked: root.download(root.title + " (" + model.lang + ")", model.link)
+                onClicked: root.download(root.title + " (" + model.lang + " PDF)", model.link)
             }
         }
     }

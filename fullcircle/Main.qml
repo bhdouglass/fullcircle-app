@@ -16,6 +16,7 @@ MainView {
       IssueListPage {
          id: issueListPage
          visible: false
+
          onOpenIssue: {
             issuePage.title = title
             issuePage.img = img

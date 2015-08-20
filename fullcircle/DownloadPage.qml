@@ -9,12 +9,14 @@ Page {
 
     property string url: ""
     property string name: ""
-    property string downloadId: ""
+    property string path: ""
     property var activeTransfer
 
     title: i18n.tr("Download")
 
     onUrlChanged: {
+        open.visible = false;
+
         if (url) {
             download.download(url);
         }
@@ -25,21 +27,10 @@ Page {
 
         autoStart: true
 
-        onDownloadIdChanged: {
-            console.log('download id changed');
-            console.log(download.downloadId);
-
-            root.downloadId = downloadId;
-            console.log(root.downloadId);
-            PopupUtils.open(openDialog, root, {/*"contentType": ContentType.Documents, */"downloadId": root.downloadId});
+        onFinished: {
+            root.path = path;
+            open.visible = true
         }
-
-        /*onFinished: {
-            console.log(path);
-            console.log(download.isCompleted)
-            console.log('download id ' + download.downloadId);
-            console.log(download.downloadId);
-        }*/
     }
 
     Label {
@@ -50,6 +41,7 @@ Page {
             left: parent.left
             right: parent.right
 
+            topMargin: units.gu(2)
             leftMargin: units.gu(2)
             rightMargin: units.gu(2)
         }
@@ -76,7 +68,8 @@ Page {
     }
 
     Button {
-        //visible: download.isCompleted
+        id: open
+        visible: false
 
         anchors {
             left: parent.left
@@ -89,11 +82,8 @@ Page {
         }
 
         text: i18n.tr("Open")
-        //onClicked: Qt.openUrlExternally(url)
         onClicked: {
-            console.log('open');
-            console.log(root.downloadId);
-            PopupUtils.open(openDialog, root, {/*"contentType": ContentType.Documents, */"downloadId": root.downloadId});
+            PopupUtils.open(openDialog, root, {"path": root.path});
         }
     }
 

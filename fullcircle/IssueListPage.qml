@@ -34,6 +34,7 @@ Page {
         }
         else {
             console.log('no need to update issue list');
+            updateModel();
         }
     }
 
@@ -73,32 +74,32 @@ Page {
         xhr.send();
     }
 
-    Column {
-        spacing: units.gu(1)
+    ListModel {
+        id: issueListModel
+    }
+
+    ActivityIndicator {
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: parent.verticalCenter
+        }
+
+        running: issueListModel.count === 0
+    }
+
+    ListView {
+        visible: issueListModel.count > 0
         anchors.fill: parent
+        width: parent.width
+        height: parent.height
 
-        ListModel {
-            id: issueListModel
-        }
+        model: issueListModel
 
-        ActivityIndicator {
-            running: issueListModel.count === 0
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        ListView {
-            anchors.top: parent.top
-            width: parent.width
-            height: parent.height
-
-            model: issueListModel
-
-            delegate: ListItem.Standard {
-                text: model.title
-                iconSource: Qt.resolvedUrl(model.img)
-                progression: true
-                onClicked: root.openIssue(model.title, model.img, model.link, model.id)
-            }
+        delegate: ListItem.Standard {
+            text: model.title
+            iconSource: Qt.resolvedUrl(model.img)
+            progression: true
+            onClicked: root.openIssue(model.title, model.img, model.link, model.id)
         }
     }
 }

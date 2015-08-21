@@ -3,23 +3,48 @@ import Ubuntu.Components 1.2
 import Ubuntu.DownloadManager 0.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import Ubuntu.Components.Popups 1.0
+import U1db 1.0 as U1db
+import "moment.js" as Moment
 
 Page {
     id: root
 
-    property string url: ""
-    property string name: ""
-    property string path: ""
+    property string url
+    property string name
+    property string path
+    property bool downloading: true
     property var activeTransfer
 
-    title: i18n.tr("Download")
+    title: i18n.tr('Download')
+
+    U1db.Database {
+        id: u1db
+        path: "fullcircle.bhdouglass.downloads"
+    }
 
     onUrlChanged: {
         open.visible = false;
 
         if (url) {
-            download.download(url);
+            var doc = u1db.getDoc(urlToId(url));
+            if (doc && doc.path) {
+                console.log('found downloaded file in database');
+
+                path = doc.path;
+                downloading = false;
+                open.visible = true;
+            }
+            else {
+                console.log('going to download file');
+
+                downloading = true;
+                download.download(url);
+            }
         }
+    }
+
+    function urlToId(url) {
+        return url.replace('http://', '').replace('https://', '').replace(/\./g, '_').replace(/\//g, '_');
     }
 
     SingleDownload {
@@ -29,7 +54,14 @@ Page {
 
         onFinished: {
             root.path = path;
-            open.visible = true
+            open.visible = true;
+
+            var now = Moment.moment();
+            u1db.putDoc({
+                path: path,
+                url: url,
+                fetchTime: now.valueOf(),
+            }, urlToId(url));
         }
     }
 
@@ -46,7 +78,7 @@ Page {
             rightMargin: units.gu(2)
         }
 
-        text: "Downloading: " + name
+        text: i18n.tr('Downloading: ') + name
     }
 
     ProgressBar {
@@ -54,7 +86,7 @@ Page {
 
         minimumValue: 0
         maximumValue: 100
-        value: download.progress
+        value: downloading ? download.progress : 100
 
         anchors {
             left: parent.left
@@ -81,9 +113,9 @@ Page {
             rightMargin: units.gu(2)
         }
 
-        text: i18n.tr("Open")
+        text: i18n.tr('Open')
         onClicked: {
-            PopupUtils.open(openDialog, root, {"path": root.path});
+            PopupUtils.open(openDialog, root, {'path': root.path});
         }
     }
 

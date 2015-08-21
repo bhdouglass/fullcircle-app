@@ -6,13 +6,13 @@ import "moment.js" as Moment //https://plus.google.com/+MikkoAhlroth/posts/JW67r
 
 Page {
     id: root
-    title: i18n.tr("Full Circle Magazine")
+    title: i18n.tr('Full Circle Magazine')
 
     signal openIssue(string title, string img, string link, string issueId)
 
     U1db.Database {
         id: u1db
-        path: "fullcircle.bhdouglass.issues"
+        path: 'fullcircle.bhdouglass.issues'
     }
 
     Component.onCompleted: {
@@ -29,11 +29,11 @@ Page {
         }
 
         if (update) {
-            console.log('going to update');
+            console.log('going to update issue list');
             updateDatabase();
         }
         else {
-            console.log('no need to update');
+            console.log('no need to update issue list');
         }
     }
 
@@ -53,23 +53,17 @@ Page {
 
     function updateDatabase() {
         var xhr = new XMLHttpRequest;
-        xhr.open("GET", "https://www.kimonolabs.com/api/6tvvisv6?apikey=VcJUuOZizXZr5J7vwfFzff3Tt6m6q5t7&kimmodify=1");
+        xhr.open('GET', 'https://www.kimonolabs.com/api/6tvvisv6?apikey=VcJUuOZizXZr5J7vwfFzff3Tt6m6q5t7&kimmodify=1');
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 var json = JSON.parse(xhr.responseText).results;
 
                 for (var index in json) {
-                    var split = json[index].id.split('-');
-                    while (split[1].length < 3) { //Add leading zeros
-                        split[1] = '0' + split[1];
-                    }
-                    var id = split[0] + '_' + split[1];
-
                     var now = Moment.moment();
                     json[index].fetchTime = now.valueOf();
 
-                    u1db.putDoc(json[index], id);
+                    u1db.putDoc(json[index], json[index].id.replace('-', '_'));
                 }
 
                 updateModel();
@@ -81,10 +75,7 @@ Page {
 
     Column {
         spacing: units.gu(1)
-        anchors {
-            topMargin: units.gu(2)
-            fill: parent
-        }
+        anchors.fill: parent
 
         ListModel {
             id: issueListModel

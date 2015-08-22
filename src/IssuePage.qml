@@ -14,8 +14,6 @@ Page {
     signal download(string name, string url)
 
     Component.onCompleted: {
-        updateModel();
-
         var update = true;
         var docs = u1db.listDocs();
         if (docs.length > 1) {
@@ -34,12 +32,40 @@ Page {
             console.log('no need to update issue info');
             updateModel()
         }
+
+        update = true;
+        docs = u1dbImages.listDocs();
+        if (docs.length > 1) {
+            var doc = u1dbImages.getDoc(docs[0]);
+
+            if (doc.fetchTime && Moment.moment().diff(doc.fetchTime, 'days') <= 3) {
+                update = false;
+            }
+        }
+
+        if (update) {
+            console.log('going to update images');
+            updateImageDatabase();
+        }
+        else {
+            console.log('no need to update images');
+            updateImage()
+        }
     }
-    onIssueIdChanged: updateModel()
+
+    onIssueIdChanged: {
+        updateModel();
+        updateImage();
+    }
 
     U1db.Database {
         id: u1db
         path: "fullcircle.bhdouglass.issueInfo"
+    }
+
+    U1db.Database {
+        id: u1dbImages
+        path: "fullcircle.bhdouglass.issueImages"
     }
 
     function updateDatabase() {
@@ -81,12 +107,34 @@ Page {
         xhr.send();
     }
 
+    function updateImageDatabase() {
+        var xhr = new XMLHttpRequest;
+        xhr.open('GET', 'https://www.kimonolabs.com/api/aqhdeyvu?apikey=VcJUuOZizXZr5J7vwfFzff3Tt6m6q5t7&kimmodify=1');
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                var json = JSON.parse(xhr.responseText).results.images;
+
+                for (var index in json) {
+                    var now = Moment.moment();
+                    json[index].fetchTime = now.valueOf();
+
+                    u1dbImages.putDoc(json[index], index.replace('-', '_'));
+                }
+
+                updateImage();
+            }
+        }
+
+        xhr.send();
+    }
+
     function updateModel() {
         downloadsModel.clear();
         description = ""
 
-        var update = true;
         if (issueId) {
+            var update = true;
             var doc = u1db.getDoc(issueId.replace('-', '_'));
 
             if (doc) {
@@ -102,10 +150,28 @@ Page {
                     description = doc.description;
                 }
             }
-        }
 
-        if (update) {
-            updateDatabase();
+            if (update) {
+                updateDatabase();
+            }
+        }
+    }
+
+    function updateImage() {
+        if (issueId) {
+            var update = true;
+            var doc = u1dbImages.getDoc(issueId.replace('-', '_'));
+
+            if (doc) {
+                if (doc.image) {
+                    update = false;
+                    img = doc.image;
+                }
+            }
+
+            if (update) {
+                updateImageDatabase();
+            }
         }
     }
 

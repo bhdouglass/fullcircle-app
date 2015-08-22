@@ -6,11 +6,11 @@ TEMPLATE = subdirs
 #load Ubuntu specific features
 load(ubuntu-click)
 
-SUBDIRS += fullcircle
+SUBDIRS += src
 
 # specify the manifest file, this file is required for click
 # packaging and for the IDE to create runconfigurations
-UBUNTU_MANIFEST_FILE=manifest.json.in
+UBUNTU_MANIFEST_FILE=click/manifest.json.in
 
 # specify translation domain, this must be equal with the
 # app name in the manifest file
@@ -27,14 +27,3 @@ UBUNTU_TRANSLATION_SOURCES+= \
 # specifies all translations files and makes sure they are
 # compiled and installed into the right place in the click package
 UBUNTU_PO_FILES+=$$files(po/*.po)
-
-aptest.target   = autopilot
-aptest.commands = bash $$PWD/app/tests/autopilot/run
-aptest.depends  = sub-app
-
-unittest.target   = check
-unittest.commands = /usr/bin/qmltestrunner -input $$PWD/app/tests/unit 
-unittest.depends  = sub-app
-
-QMAKE_EXTRA_TARGETS += aptest unittest
-

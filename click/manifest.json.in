@@ -1,16 +1,16 @@
 {
     "name": "fullcircle.bhdouglass",
-    "description": "description of fullcircle",
+    "description": "Unofficial Full Circle Magazine app for Ubuntu Touch",
     "architecture": "@CLICK_ARCH@",
     "title": "fullcircle",
     "hooks": {
         "fullcircle": {
             "apparmor": "fullcircle/fullcircle.apparmor",
             "desktop": "fullcircle/fullcircle.desktop",
-            "content-hub": "fullcircle/fullcircle-content-hub.json"
+            "content-hub": "fullcircle/fullcircle.content-hub"
         }
     },
-    "version": "0.1",
+    "version": "1.0",
     "maintainer": "Brian Douglass <bhdouglass@gmail.com>",
     "framework" : "ubuntu-sdk-15.04"
 }

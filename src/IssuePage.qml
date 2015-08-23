@@ -7,10 +7,11 @@ import "moment.js" as Moment
 Page {
     id: root
 
-    property string img: ""
-    property string link: ""
-    property string issueId: ""
-    property string description: ""
+    property string img: ''
+    property string link: ''
+    property string issueId: ''
+    property string description: ''
+    property bool err: false
     signal download(string name, string url)
 
     Component.onCompleted: {
@@ -60,12 +61,12 @@ Page {
 
     U1db.Database {
         id: u1db
-        path: "fullcircle.bhdouglass.issueInfo"
+        path: 'fullcircle.bhdouglass.issueInfo'
     }
 
     U1db.Database {
         id: u1dbImages
-        path: "fullcircle.bhdouglass.issueImages"
+        path: 'fullcircle.bhdouglass.issueImages'
     }
 
     function updateDatabase() {
@@ -74,33 +75,49 @@ Page {
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                var json = JSON.parse(xhr.responseText).results;
+                console.log('issue info response code: ' + xhr.status);
+                if (xhr.status == 200) {
+                    root.err = false;
+                    var json = JSON.parse(xhr.responseText).results;
 
-                var info = {};
-                for (var index in json.downloads) {
-                    if (!info[index]) {
-                        info[index] = {};
+                    var info = {};
+                    for (var index in json.downloads) {
+                        if (!info[index]) {
+                            info[index] = {};
+                        }
+
+                        info[index].downloads = json.downloads[index];
                     }
 
-                    info[index].downloads = json.downloads[index];
-                }
+                    for (var index in json.descriptions) {
+                        if (!info[index]) {
+                            info[index] = {};
+                        }
 
-                for (var index in json.descriptions) {
-                    if (!info[index]) {
-                        info[index] = {};
+                        info[index].description = json.descriptions[index];
                     }
 
-                    info[index].description = json.descriptions[index];
+                    for (var index in info) {
+                        var now = Moment.moment();
+                        info[index].fetchTime = now.valueOf();
+
+                        u1db.putDoc(info[index], index.replace('-', '_'));
+                    }
+
+                    updateModel();
                 }
+                else {
+                    root.err = true;
+                    var docs = u1db.listDocs();
+                    if (docs.length > 1) {
+                        var doc = u1db.getDoc(docs[0]);
 
-                for (var index in info) {
-                    var now = Moment.moment();
-                    info[index].fetchTime = now.valueOf();
-
-                    u1db.putDoc(info[index], index.replace('-', '_'));
+                        //Only show error if more than a week out of date
+                        if (doc.fetchTime && Moment.moment().diff(doc.fetchTime, 'days') <= 7) {
+                            root.err = false;
+                        }
+                    }
                 }
-
-                updateModel();
             }
         }
 
@@ -113,16 +130,19 @@ Page {
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                var json = JSON.parse(xhr.responseText).results.images;
+                console.log('issue images response code: ' + xhr.status);
+                if (xhr.status == 200) {
+                    var json = JSON.parse(xhr.responseText).results.images;
 
-                for (var index in json) {
-                    var now = Moment.moment();
-                    json[index].fetchTime = now.valueOf();
+                    for (var index in json) {
+                        var now = Moment.moment();
+                        json[index].fetchTime = now.valueOf();
 
-                    u1dbImages.putDoc(json[index], index.replace('-', '_'));
+                        u1dbImages.putDoc(json[index], index.replace('-', '_'));
+                    }
+
+                    updateImage();
                 }
-
-                updateImage();
             }
         }
 
@@ -131,7 +151,7 @@ Page {
 
     function updateModel() {
         downloadsModel.clear();
-        description = ""
+        description = ''
 
         if (issueId) {
             var update = true;
@@ -208,8 +228,48 @@ Page {
             }
         }
 
+        ActivityIndicator {
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                verticalCenter: parent.verticalCenter
+            }
+
+            running: !description && !root.err
+        }
+
+        Label {
+            id: errorLabel
+            visible: root.err
+            anchors {
+                top: image.bottom
+                topMargin: units.gu(1)
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            text: i18n.tr('An error has occurred fetching data')
+        }
+
+        Button {
+            visible: root.err
+            anchors {
+                top: errorLabel.bottom
+                topMargin: units.gu(1)
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            text: i18n.tr('Tap to retry')
+            color: UbuntuColors.orange
+            onClicked: {
+                root.err = false;
+                downloadsModel.clear();
+                description = ''
+                updateDatabase();
+            }
+        }
+
         Flickable {
             id: labelFlick
+            visible: !root.err
 
             anchors {
                 top: image.bottom
@@ -239,6 +299,7 @@ Page {
     }
 
     ListView {
+        visible: !root.err
         width: parent.width
         anchors {
             top: container.bottom

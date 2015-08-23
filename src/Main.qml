@@ -24,6 +24,14 @@ MainView {
             issuePage.issueId = issueId
             pageStack.push(issuePage)
          }
+
+         head.actions: [
+            Action {
+               iconName: 'info'
+               text: i18n.tr('About')
+               onTriggered: pageStack.push(aboutPage);
+            }
+         ]
       }
 
       IssuePage {
@@ -34,10 +42,31 @@ MainView {
             downloadPage.url = url
             pageStack.push(downloadPage)
          }
+
+         head.actions: [
+            Action {
+               iconName: 'info'
+               text: i18n.tr('About')
+               onTriggered: pageStack.push(aboutPage);
+            }
+         ]
       }
 
       DownloadPage {
          id: downloadPage
+         visible: false
+
+         head.actions: [
+            Action {
+               iconName: 'info'
+               text: i18n.tr('About')
+               onTriggered: pageStack.push(aboutPage);
+            }
+         ]
+      }
+
+      AboutPage {
+         id: aboutPage
          visible: false
       }
    }

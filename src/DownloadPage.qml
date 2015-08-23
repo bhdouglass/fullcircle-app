@@ -114,6 +114,7 @@ Page {
         }
 
         text: i18n.tr('Open')
+        color: UbuntuColors.orange
         onClicked: {
             PopupUtils.open(openDialog, root, {'path': root.path});
         }

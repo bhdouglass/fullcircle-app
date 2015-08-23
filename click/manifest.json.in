@@ -2,7 +2,7 @@
     "name": "fullcircle.bhdouglass",
     "description": "Unofficial Full Circle Magazine app for Ubuntu Touch",
     "architecture": "@CLICK_ARCH@",
-    "title": "fullcircle",
+    "title": "Full Circle",
     "hooks": {
         "fullcircle": {
             "apparmor": "fullcircle/fullcircle.apparmor",

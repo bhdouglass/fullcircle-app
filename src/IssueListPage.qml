@@ -61,10 +61,16 @@ Page {
                 var json = JSON.parse(xhr.responseText).results;
 
                 for (var index in json) {
+                    var split = json[index].id.split('-');
+                    while (split[1].length < 3) { //Add leading zeros
+                        split[1] = '0' + split[1];
+                    }
+                    var id = split[0] + '_' + split[1];
+
                     var now = Moment.moment();
                     json[index].fetchTime = now.valueOf();
 
-                    u1db.putDoc(json[index], json[index].id.replace('-', '_'));
+                    u1db.putDoc(json[index], id);
                 }
 
                 updateModel();

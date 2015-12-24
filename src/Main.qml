@@ -18,9 +18,6 @@ MainView {
          visible: false
 
          onOpenIssue: {
-            issuePage.title = title
-            issuePage.img = img
-            issuePage.link = link
             issuePage.issueId = issueId
             pageStack.push(issuePage)
          }

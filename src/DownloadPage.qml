@@ -4,7 +4,6 @@ import Ubuntu.DownloadManager 0.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import Ubuntu.Components.Popups 1.0
 import U1db 1.0 as U1db
-import "moment.js" as Moment
 
 Page {
     id: root
@@ -56,11 +55,9 @@ Page {
             root.path = path;
             open.visible = true;
 
-            var now = Moment.moment();
             u1db.putDoc({
                 path: path,
                 url: url,
-                fetchTime: now.valueOf(),
             }, urlToId(url));
         }
     }

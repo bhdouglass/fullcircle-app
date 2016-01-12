@@ -19,12 +19,7 @@ Page {
             rightMargin: units.gu(2)
         }
 
-        text: i18n.tr(
-            'This is an unofficial app for Full Circle Magazine built and ' +
-            'maintained by Brian Douglass. The author is not endorsed by or ' +
-            'affiliated with Full Circle.\n\nRonnie Tucker is the editor of Full ' +
-            'Circle and deserves all the credit for the fine Magazine.'
-        )
+        text: i18n.tr('The Full Circle Magazine App\nApp Author: Brian Douglass\nMagazine Editor: Ronnie Tucker')
         wrapMode: Text.WordWrap
     }
 

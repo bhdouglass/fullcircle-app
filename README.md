@@ -1,10 +1,10 @@
 # Full Circle App #
 
-Unofficial Ubuntu Touch app for Full Circle Magazine
+The Ubuntu Touch app for Full Circle Magazine
 
 ## License ##
 
-Author: [Brian Douglass](http://bhdouglass.com/)
+App Author: [Brian Douglass](http://bhdouglass.com/)
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3, as published
 by the Free Software Foundation.

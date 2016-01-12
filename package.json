@@ -18,6 +18,6 @@
   "homepage": "https://github.com/bhdouglass/fullcircle-app#readme",
   "dependencies": {
     "axios": "^0.7.0",
-    "moment": "^2.10.6"
+    "moment": "^2.11.1"
   }
 }

@@ -9,11 +9,12 @@ Page {
     title: i18n.tr('Full Circle Magazine')
 
     property bool err: false
+    property bool loading: false
     signal openIssue(string issueId)
 
     U1db.Database {
         id: metadatadb
-        path: 'fullcircle.bhdouglass.metadata.v2'
+        path: 'fullcircle.bhdouglass.metadata.v3'
     }
 
     U1db.Database {
@@ -32,39 +33,6 @@ Page {
         }
     }
 
-    Component.onCompleted: {
-        Bundle.setupTimeout(timer);
-
-        var lastChecked = metadatadb.getDoc('lastChecked');
-        var check = true;
-        if (lastChecked) {
-            var now = Bundle.modules.moment();
-            lastChecked = Bundle.modules.moment(lastChecked);
-            if (now.diff(lastChecked, 'days') === 0) {
-                check = false;
-            }
-        }
-
-        updateModel();
-        if (check) {
-            Bundle.modules.fetchIssues(function(err, issues, lastChecked) {
-                if (err) {
-                    if (!lastChecked) {
-                        root.err = true;
-                    }
-                }
-                else {
-                    metadatadb.putDoc(lastChecked, 'lastChecked');
-                    for (var index in issues) {
-                        issuesdb.putDoc(issues[index], issues[index].id);
-                    }
-
-                    updateModel();
-                }
-            });
-        }
-    }
-
     function updateModel() {
         var issues = [];
         var docs = issuesdb.listDocs();
@@ -77,6 +45,43 @@ Page {
         for (var index in issues) {
             issueListModel.append(issues[index]);
         }
+    }
+
+    function refresh() {
+        root.loading = true;
+        var lastChecked = metadatadb.getDoc('lastChecked');
+        if (lastChecked) {
+            lastChecked = Bundle.modules.moment(lastChecked);
+        }
+
+        updateModel();
+        Bundle.modules.fetchIssues(function(err, issues, lc) {
+            if (err) {
+                console.error('error: ' + err);
+
+                //Only show an error if there isn't any data or the data is older than 7 days
+                var now = Bundle.modules.moment();
+                if (now.diff(lastChecked, 'days') > 7 || issueListModel.count === 0) {
+                    root.err = true;
+                }
+
+                root.loading = false;
+            }
+            else {
+                metadatadb.putDoc(Bundle.modules.moment().unix(), 'lastChecked');
+                for (var index in issues) {
+                    issuesdb.putDoc(issues[index], issues[index].id);
+                }
+
+                updateModel();
+                root.loading = false;
+            }
+        });
+    }
+
+    Component.onCompleted: {
+        Bundle.setupTimeout(timer);
+        refresh();
     }
 
     ListModel {
@@ -107,7 +112,7 @@ Page {
         onClicked: {
             root.err = false;
             issueListModel.clear();
-            updateDatabase();
+            refresh();
         }
     }
 

@@ -62,101 +62,8 @@ var modules = (function outer (modules, cache, entry) {
     return newRequire(entry[0]);
 })
 ({1:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = setTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    clearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],2:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":4}],3:[function(require,module,exports){
+},{"./lib/axios":3}],2:[function(require,module,exports){
 'use strict';
 
 /*global ActiveXObject:true*/
@@ -274,7 +181,7 @@ module.exports = function xhrAdapter(resolve, reject, config) {
   request.send(data);
 };
 
-},{"./../defaults":7,"./../helpers/buildUrl":8,"./../helpers/cookies":9,"./../helpers/parseHeaders":10,"./../helpers/transformData":12,"./../helpers/urlIsSameOrigin":13,"./../utils":14}],4:[function(require,module,exports){
+},{"./../defaults":6,"./../helpers/buildUrl":7,"./../helpers/cookies":8,"./../helpers/parseHeaders":9,"./../helpers/transformData":11,"./../helpers/urlIsSameOrigin":12,"./../utils":13}],3:[function(require,module,exports){
 'use strict';
 
 var defaults = require('./defaults');
@@ -364,7 +271,7 @@ axios.interceptors = {
   createShortMethodsWithData('post', 'put', 'patch');
 })();
 
-},{"./core/InterceptorManager":5,"./core/dispatchRequest":6,"./defaults":7,"./helpers/spread":11,"./utils":14}],5:[function(require,module,exports){
+},{"./core/InterceptorManager":4,"./core/dispatchRequest":5,"./defaults":6,"./helpers/spread":10,"./utils":13}],4:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -418,7 +325,7 @@ InterceptorManager.prototype.forEach = function (fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":14}],6:[function(require,module,exports){
+},{"./../utils":13}],5:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -448,7 +355,7 @@ module.exports = function dispatchRequest(config) {
 
 
 }).call(this,require('_process'))
-},{"../adapters/http":3,"../adapters/xhr":3,"_process":1}],7:[function(require,module,exports){
+},{"../adapters/http":2,"../adapters/xhr":2,"_process":16}],6:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -512,7 +419,7 @@ module.exports = {
   xsrfHeaderName: 'X-XSRF-TOKEN'
 };
 
-},{"./utils":14}],8:[function(require,module,exports){
+},{"./utils":13}],7:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -573,7 +480,7 @@ module.exports = function buildUrl(url, params) {
   return url;
 };
 
-},{"./../utils":14}],9:[function(require,module,exports){
+},{"./../utils":13}],8:[function(require,module,exports){
 'use strict';
 
 /**
@@ -618,7 +525,7 @@ module.exports = {
   }
 };
 
-},{"./../utils":14}],10:[function(require,module,exports){
+},{"./../utils":13}],9:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -654,7 +561,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":14}],11:[function(require,module,exports){
+},{"./../utils":13}],10:[function(require,module,exports){
 'use strict';
 
 /**
@@ -683,7 +590,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -704,7 +611,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":14}],13:[function(require,module,exports){
+},{"./../utils":13}],12:[function(require,module,exports){
 'use strict';
 
 /**
@@ -764,7 +671,7 @@ module.exports = function urlIsSameOrigin(requestUrl) {
         parsed.host === originUrl.host);
 };
 
-},{"./../utils":14}],14:[function(require,module,exports){
+},{"./../utils":13}],13:[function(require,module,exports){
 'use strict';
 
 /*global toString:true*/
@@ -1015,7 +922,7 @@ module.exports = {
   trim: trim
 };
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 //! moment.js
 //! version : 2.11.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -4622,7 +4529,7 @@ module.exports = {
     return _moment;
 
 }));
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var axios = require('axios');
 var moment = require('moment');
 
@@ -4633,14 +4540,12 @@ function fetchIssues(callback) {
 
     var issues = [];
     for (var key in res.data) {
-      console.log(key);
       if (key != 'limit') {
         var issue = res.data[key];
         var id = key.replace('issue-', '');
         while (id.length < 3) { //Add leading zeros
           id = '0' + id;
         }
-        console.log(id);
 
         issue.id = 'issue-' + id;
 
@@ -4651,7 +4556,6 @@ function fetchIssues(callback) {
             link: issue.links[lang],
           });
         }
-        console.log(downloads);
 
         delete issue.links;
         issue.downloads = downloads.sort(function(a, b) { //sort by language
@@ -4665,7 +4569,6 @@ function fetchIssues(callback) {
 
           return value;
         });
-        console.log('test');
 
         issues.push(issue);
       }
@@ -4683,8 +4586,6 @@ function fetchIssues(callback) {
       return value;
     });
 
-    console.log(issues[0]);
-
     callback(null, issues);
   }).catch(function(res) {
     console.error('request error: ' + JSON.stringify(res));
@@ -4695,4 +4596,97 @@ function fetchIssues(callback) {
 exports.fetchIssues = fetchIssues;
 exports.moment = moment;
 
-},{"axios":2,"moment":15}]},{},[16]);
+},{"axios":1,"moment":14}],16:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}]},{},[15]);

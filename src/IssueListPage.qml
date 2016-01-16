@@ -55,7 +55,7 @@ Page {
         }
 
         updateModel();
-        Bundle.modules.fetchIssues(function(err, issues, lc) {
+        Bundle.modules.fetchIssues(function(err, issues) {
             if (err) {
                 console.error('error: ' + err);
 

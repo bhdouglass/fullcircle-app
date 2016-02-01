@@ -4547,7 +4547,7 @@ function fetchIssues(callback) {
           id = '0' + id;
         }
 
-        issue.id = 'issue-' + id;
+        issue.id = 'issue_' + id;
 
         var downloads = [];
         for (var lang in issue.links) {

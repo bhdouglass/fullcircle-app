@@ -37,7 +37,11 @@ Page {
         var issues = [];
         var docs = issuesdb.listDocs();
         for (var index in docs) {
-            issues.push(issuesdb.getDoc(docs[index]));
+            var issue = issuesdb.getDoc(docs[index]);
+
+            if (issue && issue.title) {
+                issues.push(issue);
+            }
         }
 
         issues.reverse();
@@ -69,8 +73,18 @@ Page {
             }
             else {
                 metadatadb.putDoc(Bundle.modules.moment().unix(), 'lastChecked');
+
+                var ids = [];
                 for (var index in issues) {
                     issuesdb.putDoc(issues[index], issues[index].id);
+                    ids.push(issues[index].id);
+                }
+
+                var docs = issuesdb.listDocs();
+                for (var index in docs) {
+                    if (ids.indexOf(docs[index]) == -1) {
+                        issuesdb.deleteDoc(docs[index]);
+                    }
                 }
 
                 updateModel();

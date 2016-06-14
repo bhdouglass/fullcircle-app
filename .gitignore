@@ -33,5 +33,5 @@ Makefile*
 *.qmlproject.user
 *.qmlproject.user.*
 
-build-*
+build*
 node_modules

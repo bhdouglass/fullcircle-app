@@ -1,157 +1,127 @@
 import QtQuick 2.4
-import Ubuntu.Components 1.2
-import Ubuntu.Components.ListItems 1.0 as ListItem
+import QtQuick.Layouts 1.1
+import Ubuntu.Components 1.3
 import U1db 1.0 as U1db
-import "bundle.js" as Bundle
+import "index.js" as Index
 
 Page {
-    id: root
+    id: issueListPage
     title: i18n.tr('Full Circle Magazine')
 
-    property bool err: false
     property bool loading: false
-    signal openIssue(string issueId)
+    property bool err: false
 
-    U1db.Database {
+    head.actions: [
+        Action {
+            id: about
+            iconName: 'info'
+            text: i18n.tr('About')
+            onTriggered: pageStack.push(Qt.resolvedUrl("AboutPage.qml"));
+        }
+    ]
+
+    function refresh() {
+        issueListPage.loading = true;
+        Index.refreshIssues(issueListModel, issuesdb, function(err) {
+            issueListPage.loading = false;
+            if (err) {
+                issueListPage.err = true;
+            }
+            else {
+                issueListPage.err = false;
+            }
+        });
+    }
+
+    Component.onCompleted: {
+        refresh();
+    }
+
+    /*U1db.Database {
         id: metadatadb
         path: 'fullcircle.bhdouglass.metadata.v3'
-    }
+    }*/
 
     U1db.Database {
         id: issuesdb
         path: 'fullcircle.bhdouglass.issues.v2'
     }
 
-    Timer {
-        id: timer
-        property var callback: function() {}
-        interval: 500
-        running: false
-        repeat: false
-        onTriggered: {
-            timer.callback();
-        }
-    }
-
-    function updateModel() {
-        var issues = [];
-        var docs = issuesdb.listDocs();
-        for (var index in docs) {
-            var issue = issuesdb.getDoc(docs[index]);
-
-            if (issue && issue.title) {
-                issues.push(issue);
-            }
-        }
-
-        issues.reverse();
-        issueListModel.clear();
-        for (var index in issues) {
-            issueListModel.append(issues[index]);
-        }
-    }
-
-    function refresh() {
-        root.loading = true;
-        var lastChecked = metadatadb.getDoc('lastChecked');
-        if (lastChecked) {
-            lastChecked = Bundle.modules.moment(lastChecked);
-        }
-
-        updateModel();
-        Bundle.modules.fetchIssues(function(err, issues) {
-            if (err) {
-                console.error('error: ' + err);
-
-                //Only show an error if there isn't any data or the data is older than 7 days
-                var now = Bundle.modules.moment();
-                if (now.diff(lastChecked, 'days') > 7 || issueListModel.count === 0) {
-                    root.err = true;
-                }
-
-                root.loading = false;
-            }
-            else {
-                metadatadb.putDoc(Bundle.modules.moment().unix(), 'lastChecked');
-
-                var ids = [];
-                for (var index in issues) {
-                    issuesdb.putDoc(issues[index], issues[index].id);
-                    ids.push(issues[index].id);
-                }
-
-                var docs = issuesdb.listDocs();
-                for (var index in docs) {
-                    if (ids.indexOf(docs[index]) == -1) {
-                        issuesdb.deleteDoc(docs[index]);
-                    }
-                }
-
-                updateModel();
-                root.loading = false;
-            }
-        });
-    }
-
-    Component.onCompleted: {
-        Bundle.setupTimeout(timer);
-        refresh();
-    }
-
     ListModel {
         id: issueListModel
     }
 
-    Label {
-        id: errorLabel
-        visible: root.err
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            verticalCenter: parent.verticalCenter
-        }
-
-        text: i18n.tr('An error has occurred fetching data')
-    }
-
-    Button {
-        visible: root.err
-        anchors {
-            top: errorLabel.bottom
-            topMargin: units.gu(1)
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        text: i18n.tr('Tap to retry')
-        color: UbuntuColors.orange
-        onClicked: {
-            root.err = false;
-            issueListModel.clear();
-            refresh();
-        }
-    }
-
-    ActivityIndicator {
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            verticalCenter: parent.verticalCenter
-        }
-
-        running: issueListModel.count === 0 && !root.err
-    }
-
-    ListView {
-        visible: issueListModel.count > 0 && !root.err
+    Flickable {
         anchors.fill: parent
-        width: parent.width
-        height: parent.height
+        contentHeight: contentColumn.height + units.gu(4)
 
-        model: issueListModel
+        ColumnLayout {
+            id: contentColumn
+            anchors {
+                left: parent.left;
+                top: parent.top;
+                right: parent.right;
+                topMargin: units.gu(1)
+            }
+            spacing: units.gu(1)
 
-        delegate: ListItem.Standard {
-            text: model.title
-            iconSource: Qt.resolvedUrl(model.image)
-            progression: true
-            onClicked: root.openIssue(model.id)
+            Label {
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
+                visible: issueListPage.err && issueListModel.count === 0
+                text: i18n.tr('Unable to load issue list at this time')
+            }
+
+            Button {
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
+                visible: issueListPage.err && issueListModel.count === 0
+                text: i18n.tr('Retry')
+                color: UbuntuColors.orange
+
+                onClicked: refresh()
+            }
+
+            Repeater {
+                model: issueListModel
+
+                delegate: ListItem {
+                    RowLayout {
+                        anchors {
+                            fill: parent
+                            leftMargin: units.gu(1)
+                            rightMargin: units.gu(1)
+                            bottomMargin: units.gu(1)
+                        }
+
+                        UbuntuShape {
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: height
+
+                            sourceFillMode: UbuntuShape.PreserveAspectCrop
+                            source: Image {
+                                source: Qt.resolvedUrl(model.image)
+                            }
+                        }
+
+                        Label {
+                            text: model.title
+                            Layout.fillWidth: true
+                        }
+                    }
+
+                    onClicked: {
+                        pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {
+                            title: model.title,
+                            issueId: model.id,
+                            url: model.url,
+                            image: model.image,
+                            description: model.description,
+                            downloads: model.downloads,
+                        });
+                    }
+                }
+            }
         }
     }
 }

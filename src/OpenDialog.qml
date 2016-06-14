@@ -1,10 +1,10 @@
 import QtQuick 2.4
-import Ubuntu.Components 1.2
+import Ubuntu.Components 1.3
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Content 1.1
 
 PopupBase {
-    id: root
+    id: openDialog
     anchors.fill: parent
     property var activeTransfer
     property var path
@@ -18,7 +18,7 @@ PopupBase {
 
         ContentPeerPicker {
             id: peerPicker
-            visible: root.visible
+            visible: openDialog.visible
             handler: ContentHandler.Destination
             contentType: ContentType.Documents
 
@@ -31,11 +31,11 @@ PopupBase {
                 activeTransfer.items = items;
                 activeTransfer.state = ContentTransfer.Charged;
 
-                PopupUtils.close(root)
+                PopupUtils.close(openDialog)
             }
 
             onCancelPressed: {
-                PopupUtils.close(root)
+                PopupUtils.close(openDialog)
             }
         }
     }

@@ -1,37 +1,37 @@
 import QtQuick 2.4
-import Ubuntu.Components 1.2
+import QtQuick.Layouts 1.1
+import Ubuntu.Components 1.3
 import Ubuntu.DownloadManager 0.1
-import Ubuntu.Components.ListItems 1.0 as ListItem
 import Ubuntu.Components.Popups 1.0
 import U1db 1.0 as U1db
+import "index.js" as Index
 
 Page {
-    id: root
+    id: downloadPage
 
-    property string url
-    property string name
-    property string path
+    property string issueId: ''
+    property string url: ''
+    property string lang: ''
+    property string path: ''
     property bool downloading: true
     property var activeTransfer
-
-    title: i18n.tr('Download')
 
     U1db.Database {
         id: u1db
         path: "fullcircle.bhdouglass.downloads"
     }
 
-    onUrlChanged: {
-        open.visible = false;
+    Component.onCompleted: {
+        readButton.visible = false;
 
         if (url) {
-            var doc = u1db.getDoc(urlToId(url));
+            var doc = u1db.getDoc(Index.urlToId(url));
             if (doc && doc.path) {
                 console.log('found downloaded file in database');
 
                 path = doc.path;
                 downloading = false;
-                open.visible = true;
+                readButton.visible = true;
             }
             else {
                 console.log('going to download file');
@@ -42,78 +42,54 @@ Page {
         }
     }
 
-    function urlToId(url) {
-        return url.replace('http://', '').replace('https://', '').replace(/\./g, '_').replace(/\//g, '_');
-    }
-
     SingleDownload {
         id: download
 
         autoStart: true
 
         onFinished: {
-            root.path = path;
-            open.visible = true;
+            downloadPage.path = path;
+            readButton.visible = true;
 
             u1db.putDoc({
                 path: path,
                 url: url,
-            }, urlToId(url));
+            }, Index.urlToId(url));
         }
     }
 
-    Label {
-        id: label
+    Flickable {
+        anchors.fill: parent
+        contentHeight: contentColumn.height + units.gu(4)
 
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
+        ColumnLayout {
+            id: contentColumn
+            anchors {
+                left: parent.left;
+                top: parent.top;
+                right: parent.right;
+                margins: units.gu(2);
+            }
+            spacing: units.gu(2)
 
-            topMargin: units.gu(2)
-            leftMargin: units.gu(2)
-            rightMargin: units.gu(2)
-        }
+            ProgressBar {
+                Layout.fillWidth: true
 
-        text: i18n.tr('Downloading: ') + name
-    }
+                minimumValue: 0
+                maximumValue: 100
+                value: downloading ? download.progress : 100
+            }
 
-    ProgressBar {
-        id: progress
+            Button {
+                id: readButton
+                visible: false
 
-        minimumValue: 0
-        maximumValue: 100
-        value: downloading ? download.progress : 100
+                Layout.fillWidth: true
 
-        anchors {
-            left: parent.left
-            right: parent.right
-            top: label.bottom
-
-            topMargin: units.gu(2)
-            leftMargin: units.gu(2)
-            rightMargin: units.gu(2)
-        }
-    }
-
-    Button {
-        id: open
-        visible: false
-
-        anchors {
-            left: parent.left
-            right: parent.right
-            top: progress.bottom
-
-            topMargin: units.gu(2)
-            leftMargin: units.gu(2)
-            rightMargin: units.gu(2)
-        }
-
-        text: i18n.tr('Open')
-        color: UbuntuColors.orange
-        onClicked: {
-            PopupUtils.open(openDialog, root, {'path': root.path});
+                text: i18n.tr('Read')
+                color: UbuntuColors.orange
+                onClicked: PopupUtils.open(openDialog, downloadPage, {'path': downloadPage.path});
+            }
         }
     }
 

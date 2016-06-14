@@ -1,154 +1,87 @@
 import QtQuick 2.4
-import Ubuntu.Components 1.2
-import Ubuntu.Components.ListItems 1.0 as ListItem
+import QtQuick.Layouts 1.1
+import Ubuntu.Components 1.3
 import U1db 1.0 as U1db
 
 Page {
-    id: root
+    id: issuePage
 
-    property string img: ''
-    property string link: ''
     property string issueId: ''
+    property string url: ''
+    property string image: ''
     property string description: ''
-    property bool err: false
-    signal download(string name, string url)
+    property var downloads: null
 
-    U1db.Database {
-        id: issuesdb
-        path: 'fullcircle.bhdouglass.issues.v2'
-    }
-
-    onIssueIdChanged: {
-        var issue = issuesdb.getDoc(root.issueId);
-        root.title = issue.title;
-        root.img = issue.image;
-        root.description = issue.description;
-
-        downloadsModel.clear();
-        if (issue.downloads) {
-            for (var index in issue.downloads) {
-                downloadsModel.append(issue.downloads[index]);
-            }
+    head.actions: [
+        Action {
+            id: about
+            iconName: 'info'
+            text: i18n.tr('About')
+            onTriggered: pageStack.push(Qt.resolvedUrl("AboutPage.qml"));
         }
-    }
+    ]
 
-    Rectangle {
-        id: container
+    Flickable {
+        anchors.fill: parent
+        contentHeight: contentColumn.height + units.gu(4)
 
-        height: childrenRect.height
-        color: 'transparent'
-
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-
-            topMargin: units.gu(1)
-            leftMargin: units.gu(2)
-            rightMargin: units.gu(2)
-        }
-
-        UbuntuShape {
-            id: image
-
+        ColumnLayout {
+            id: contentColumn
             anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: parent.top
+                left: parent.left;
+                top: parent.top;
+                right: parent.right;
+                margins: units.gu(2);
             }
+            spacing: units.gu(2)
 
-            width: parent.width * (3/4)
-            height: width / 2
+            UbuntuShape {
+                Layout.preferredWidth: units.gu(30)
+                Layout.preferredHeight: width * (3/4)
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
-            sourceFillMode: UbuntuShape.PreserveAspectCrop
-            source: Image {
-                source: root.img
+                sourceFillMode: UbuntuShape.PreserveAspectCrop
+                source: Image {
+                    source: issuePage.image
+                }
             }
-        }
-
-        ActivityIndicator {
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                verticalCenter: parent.verticalCenter
-            }
-
-            running: !description && !root.err
-        }
-
-        Label {
-            id: errorLabel
-            visible: root.err
-            anchors {
-                top: image.bottom
-                topMargin: units.gu(1)
-                horizontalCenter: parent.horizontalCenter
-            }
-
-            text: i18n.tr('An error has occurred fetching data')
-        }
-
-        Button {
-            visible: root.err
-            anchors {
-                top: errorLabel.bottom
-                topMargin: units.gu(1)
-                horizontalCenter: parent.horizontalCenter
-            }
-
-            text: i18n.tr('Tap to retry')
-            color: UbuntuColors.orange
-            onClicked: {
-                root.err = false;
-                downloadsModel.clear();
-                description = ''
-                updateDatabase();
-            }
-        }
-
-        Flickable {
-            id: labelFlick
-            visible: !root.err
-
-            anchors {
-                top: image.bottom
-                topMargin: units.gu(2)
-            }
-
-            width: parent.width
-            height: root.height / 2
-            contentWidth: parent.width
-            contentHeight: label.height
-
-            flickableDirection: Flickable.VerticalFlick
-            clip: true
 
             Label {
-                id: label
+                Layout.fillWidth: true
 
-                width: parent.width
-                text: description
+                text: issuePage.description
                 wrapMode: Text.WordWrap
             }
-        }
-    }
 
-    ListModel {
-        id: downloadsModel
-    }
+            Repeater {
+                model: issuePage.downloads
 
-    ListView {
-        visible: !root.err
-        width: parent.width
-        anchors {
-            top: container.bottom
-            bottom: parent.bottom
-            topMargin: units.gu(1)
-        }
+                delegate: ListItem {
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: units.gu(1)
 
-        model: downloadsModel
-        delegate: ListItem.Standard {
-            text: i18n.tr('Download: ') + model.lang + ' ' + i18n.tr('PDF')
-            progression: true
-            onClicked: root.download(root.title + ' (' + model.lang + ' ' + i18n.tr('PDF') + ')', model.link)
+                        Label {
+                            text: i18n.tr('Download: ') + model.lang + ' ' + i18n.tr('PDF')
+                            Layout.fillWidth: true
+                        }
+
+                        Icon {
+                            name: "next"
+                            Layout.fillHeight: true
+                        }
+                    }
+
+                    onClicked: {
+                        pageStack.push(Qt.resolvedUrl("DownloadPage.qml"), {
+                            title: i18n.tr('Downloading: ') + issuePage.title + ' - ' + model.lang + ' ' + i18n.tr('PDF'),
+                            issueId: issuePage.id,
+                            url: model.link,
+                            lang: model.lang
+                        });
+                    }
+                }
+            }
         }
     }
 }

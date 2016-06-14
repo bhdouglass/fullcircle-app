@@ -4,7 +4,7 @@ import Ubuntu.Components 1.3
 import Ubuntu.DownloadManager 0.1
 import Ubuntu.Components.Popups 1.0
 import U1db 1.0 as U1db
-import "index.js" as Index
+import "utils.js" as Utils
 
 Page {
     id: downloadPage
@@ -16,6 +16,11 @@ Page {
     property bool downloading: true
     property var activeTransfer
 
+    header: PageHeader {
+        id: header
+        title: parent.title
+    }
+
     U1db.Database {
         id: u1db
         path: "fullcircle.bhdouglass.downloads"
@@ -25,7 +30,7 @@ Page {
         readButton.visible = false;
 
         if (url) {
-            var doc = u1db.getDoc(Index.urlToId(url));
+            var doc = u1db.getDoc(Utils.urlToId(url));
             if (doc && doc.path) {
                 console.log('found downloaded file in database');
 
@@ -54,12 +59,17 @@ Page {
             u1db.putDoc({
                 path: path,
                 url: url,
-            }, Index.urlToId(url));
+            }, Utils.urlToId(url));
         }
     }
 
     Flickable {
-        anchors.fill: parent
+        anchors {
+            top: header.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
         contentHeight: contentColumn.height + units.gu(4)
 
         ColumnLayout {

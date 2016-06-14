@@ -2,7 +2,7 @@ import QtQuick 2.4
 import QtQuick.Layouts 1.1
 import Ubuntu.Components 1.3
 import U1db 1.0 as U1db
-import "index.js" as Index
+import "utils.js" as Utils
 
 Page {
     id: issueListPage
@@ -10,30 +10,68 @@ Page {
 
     property bool loading: false
     property bool err: false
+    property var issues: []
 
-    head.actions: [
-        Action {
-            id: about
-            iconName: 'info'
-            text: i18n.tr('About')
-            onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
+    header: PageHeader {
+        id: header
+        title: parent.title
+
+        trailingActionBar.actions: [
+            Action {
+                iconName: 'info'
+                text: i18n.tr('About')
+                onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
+            }
+        ]
+    }
+
+    function refreshIssues() {
+        var issues = [];
+        var docs = issuesdb.listDocs();
+        for (var index in docs) {
+            var issue = issuesdb.getDoc(docs[index]);
+
+            if (issue && issue.title) {
+                issues.push(issue);
+            }
         }
-    ]
+
+        issues.reverse();
+        issueListPage.issues = issues;
+    }
 
     function refresh() {
         issueListPage.loading = true;
-        Index.refreshIssues(issueListModel, issuesdb, function(err) {
-            issueListPage.loading = false;
+        Utils.fetchIssues(function(err, issues) {
             if (err) {
+                console.error('error: ' + err);
                 issueListPage.err = true;
             }
             else {
+                var ids = [];
+                for (var index in issues) {
+                    issuesdb.putDoc(issues[index], issues[index].id);
+                    ids.push(issues[index].id);
+                }
+
+                //Remove unrecognized issues
+                var docs = issuesdb.listDocs();
+                for (var index in docs) {
+                    if (ids.indexOf(docs[index]) == -1) {
+                        issuesdb.deleteDoc(docs[index]);
+                    }
+                }
+
+                refreshIssues();
                 issueListPage.err = false;
             }
+
+            issueListPage.loading = false;
         });
     }
 
     Component.onCompleted: {
+        refreshIssues(); //Prepopulate any existing data before the network request comes back
         refresh();
     }
 
@@ -47,12 +85,13 @@ Page {
         path: 'fullcircle.bhdouglass.issues.v2'
     }
 
-    ListModel {
-        id: issueListModel
-    }
-
     Flickable {
-        anchors.fill: parent
+        anchors {
+            top: header.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
         contentHeight: contentColumn.height + units.gu(4)
 
         ColumnLayout {
@@ -83,7 +122,7 @@ Page {
             }
 
             Repeater {
-                model: issueListModel
+                model: issues
 
                 delegate: ListItem {
                     RowLayout {
@@ -100,24 +139,24 @@ Page {
 
                             sourceFillMode: UbuntuShape.PreserveAspectCrop
                             source: Image {
-                                source: Qt.resolvedUrl(model.image)
+                                source: Qt.resolvedUrl(modelData.image)
                             }
                         }
 
                         Label {
-                            text: model.title
+                            text: modelData.title
                             Layout.fillWidth: true
                         }
                     }
 
                     onClicked: {
                         pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("IssuePage.qml"), {
-                            title: model.title,
-                            issueId: model.id,
-                            url: model.url,
-                            image: model.image,
-                            description: model.description,
-                            downloads: model.downloads,
+                            title: modelData.title,
+                            issueId: modelData.id,
+                            url: modelData.url,
+                            image: modelData.image,
+                            description: modelData.description,
+                            downloads: modelData.downloads,
                         });
                     }
                 }

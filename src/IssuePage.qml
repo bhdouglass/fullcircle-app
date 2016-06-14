@@ -12,17 +12,26 @@ Page {
     property string description: ''
     property var downloads: null
 
-    head.actions: [
-        Action {
-            id: about
-            iconName: 'info'
-            text: i18n.tr('About')
-            onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
-        }
-    ]
+    header: PageHeader {
+        id: header
+        title: parent.title
+
+        trailingActionBar.actions: [
+            Action {
+                iconName: 'info'
+                text: i18n.tr('About')
+                onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
+            }
+        ]
+    }
 
     Flickable {
-        anchors.fill: parent
+        anchors {
+            top: header.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
         contentHeight: contentColumn.height + units.gu(4)
 
         ColumnLayout {
@@ -62,7 +71,7 @@ Page {
                         anchors.margins: units.gu(1)
 
                         Label {
-                            text: i18n.tr('Download: ') + model.lang + ' ' + i18n.tr('PDF')
+                            text: i18n.tr('Download: ') + modelData.lang + ' ' + i18n.tr('PDF')
                             Layout.fillWidth: true
                         }
 
@@ -75,9 +84,9 @@ Page {
                     onClicked: {
                         pageStack.addPageToCurrentColumn(issuePage, Qt.resolvedUrl("DownloadPage.qml"), {
                             title: i18n.tr('Downloading: ') + issuePage.title,
-                            issueId: issuePage.id,
-                            url: model.link,
-                            lang: model.lang
+                            issueId: issuePage.issueId,
+                            url: modelData.link,
+                            lang: modelData.lang
                         });
                     }
                 }

@@ -69,51 +69,6 @@ function fetchIssues(callback) {
     xhr.send();
 }
 
-function updateIssueModel(model, db) {
-    var issues = [];
-    var docs = db.listDocs();
-    for (var index in docs) {
-        var issue = db.getDoc(docs[index]);
-
-        if (issue && issue.title) {
-            issues.push(issue);
-        }
-    }
-
-    issues.reverse();
-    model.clear();
-    for (var index in issues) {
-        model.append(issues[index]);
-    }
-}
-
-function refreshIssues(model, db, callback) {
-    updateIssueModel(model, db);
-    fetchIssues(function(err, issues) {
-        if (err) {
-            console.error('error: ' + err);
-            callback(err);
-        }
-        else {
-            var ids = [];
-            for (var index in issues) {
-                db.putDoc(issues[index], issues[index].id);
-                ids.push(issues[index].id);
-            }
-
-            var docs = db.listDocs();
-            for (var index in docs) {
-                if (ids.indexOf(docs[index]) == -1) {
-                    db.deleteDoc(docs[index]);
-                }
-            }
-
-            updateIssueModel(model, db);
-            callback();
-        }
-    });
-}
-
 function urlToId(url) {
     return url.replace('http://', '').replace('https://', '').replace(/\./g, '_').replace(/\//g, '_');
 }

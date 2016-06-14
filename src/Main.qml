@@ -9,8 +9,9 @@ MainView {
     width: units.gu(45)
     height: units.gu(75)
 
-    PageStack {
+    AdaptivePageLayout {
         id: pageStack
-        Component.onCompleted: push(Qt.resolvedUrl("IssueListPage.qml"))
+        anchors.fill: parent
+        primaryPageSource: Qt.resolvedUrl("IssueListPage.qml")
     }
 }

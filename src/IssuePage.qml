@@ -17,7 +17,7 @@ Page {
             id: about
             iconName: 'info'
             text: i18n.tr('About')
-            onTriggered: pageStack.push(Qt.resolvedUrl("AboutPage.qml"));
+            onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
         }
     ]
 
@@ -73,8 +73,8 @@ Page {
                     }
 
                     onClicked: {
-                        pageStack.push(Qt.resolvedUrl("DownloadPage.qml"), {
-                            title: i18n.tr('Downloading: ') + issuePage.title + ' - ' + model.lang + ' ' + i18n.tr('PDF'),
+                        pageStack.addPageToCurrentColumn(issuePage, Qt.resolvedUrl("DownloadPage.qml"), {
+                            title: i18n.tr('Downloading: ') + issuePage.title,
                             issueId: issuePage.id,
                             url: model.link,
                             lang: model.lang

@@ -16,7 +16,7 @@ Page {
             id: about
             iconName: 'info'
             text: i18n.tr('About')
-            onTriggered: pageStack.push(Qt.resolvedUrl("AboutPage.qml"));
+            onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
         }
     ]
 
@@ -111,7 +111,7 @@ Page {
                     }
 
                     onClicked: {
-                        pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {
+                        pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("IssuePage.qml"), {
                             title: model.title,
                             issueId: model.id,
                             url: model.url,

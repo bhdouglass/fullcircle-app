@@ -72,6 +72,10 @@ Page {
             }
             spacing: units.gu(2)
 
+            Label {
+                text: downloadPage.lang + ' ' + i18n.tr('PDF')
+            }
+
             ProgressBar {
                 Layout.fillWidth: true
 

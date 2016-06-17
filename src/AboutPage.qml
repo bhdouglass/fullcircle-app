@@ -7,8 +7,18 @@ Page {
 
     title: i18n.tr('About')
 
+    header: PageHeader {
+        id: header
+        title: parent.title
+    }
+
     Flickable {
-        anchors.fill: parent
+        anchors {
+            top: header.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
         contentHeight: contentColumn.height + units.gu(4)
 
         ColumnLayout {

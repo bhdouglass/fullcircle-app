@@ -9,8 +9,6 @@ Page {
     title: i18n.tr('Full Circle Magazine')
 
     property bool loading: false
-    property bool err: false
-    property var issues: []
 
     header: PageHeader {
         id: header
@@ -20,7 +18,7 @@ Page {
             Action {
                 iconName: 'info'
                 text: i18n.tr('About')
-                onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
+                onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl('AboutPage.qml'))
             }
         ]
     }
@@ -37,7 +35,7 @@ Page {
         }
 
         issues.reverse();
-        issueListPage.issues = issues;
+        issueList.issues = issues;
     }
 
     function refresh() {
@@ -45,7 +43,7 @@ Page {
         Utils.fetchIssues(function(err, issues) {
             if (err) {
                 console.error('error: ' + err);
-                issueListPage.err = true;
+                issueList.err = true;
             }
             else {
                 var ids = [];
@@ -63,7 +61,7 @@ Page {
                 }
 
                 refreshIssues();
-                issueListPage.err = false;
+                issueList.err = false;
             }
 
             issueListPage.loading = false;
@@ -85,82 +83,16 @@ Page {
         path: 'fullcircle.bhdouglass.issues.v2'
     }
 
-    Flickable {
+    IssueList {
+        id: issueList
+
         anchors {
             top: header.bottom
             left: parent.left
             right: parent.right
             bottom: parent.bottom
         }
-        contentHeight: contentColumn.height + units.gu(4)
 
-        ColumnLayout {
-            id: contentColumn
-            anchors {
-                left: parent.left;
-                top: parent.top;
-                right: parent.right;
-                topMargin: units.gu(1)
-            }
-            spacing: units.gu(1)
-
-            Label {
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-
-                visible: issueListPage.err && issueListModel.count === 0
-                text: i18n.tr('Unable to load issue list at this time')
-            }
-
-            Button {
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-
-                visible: issueListPage.err && issueListModel.count === 0
-                text: i18n.tr('Retry')
-                color: UbuntuColors.orange
-
-                onClicked: refresh()
-            }
-
-            Repeater {
-                model: issues
-
-                delegate: ListItem {
-                    RowLayout {
-                        anchors {
-                            fill: parent
-                            leftMargin: units.gu(1)
-                            rightMargin: units.gu(1)
-                            bottomMargin: units.gu(1)
-                        }
-
-                        UbuntuShape {
-                            Layout.fillHeight: true
-                            Layout.preferredWidth: height
-
-                            sourceFillMode: UbuntuShape.PreserveAspectCrop
-                            source: Image {
-                                source: Qt.resolvedUrl(modelData.image)
-                            }
-                        }
-
-                        Label {
-                            text: modelData.title
-                            Layout.fillWidth: true
-                        }
-                    }
-
-                    onClicked: {
-                        pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("IssuePage.qml"), {
-                            title: modelData.title,
-                            issueId: modelData.id,
-                            url: modelData.url,
-                            image: modelData.image,
-                            description: modelData.description,
-                            downloads: modelData.downloads,
-                        });
-                    }
-                }
-            }
-        }
+        onRefresh: refresh();
     }
 }

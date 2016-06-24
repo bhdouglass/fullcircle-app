@@ -11,6 +11,7 @@ Page {
     property string image: ''
     property string description: ''
     property var downloads: null
+    property bool favorite: false
 
     header: PageHeader {
         id: header
@@ -18,11 +19,26 @@ Page {
 
         trailingActionBar.actions: [
             Action {
-                iconName: 'info'
-                text: i18n.tr('About')
-                onTriggered: pageStack.addPageToNextColumn(pageStack.primaryPage, Qt.resolvedUrl("AboutPage.qml"))
+                iconName: issuePage.favorite ? 'starred' : 'non-starred'
+                text: issuePage.favorite ? i18n.tr('Unfavorite') : i18n.tr('Mark as Favorite')
+                onTriggered: {
+                    issuePage.favorite = !issuePage.favorite;
+                    favoritesdb.putDoc({favorite: issuePage.favorite}, issuePage.issueId);
+                }
             }
         ]
+    }
+
+    U1db.Database {
+        id: favoritesdb
+        path: 'fullcircle.bhdouglass.favorites.v1'
+    }
+
+    Component.onCompleted: {
+        var doc = favoritesdb.getDoc(issuePage.issueId);
+        if (doc && doc.favorite !== undefined) {
+            issuePage.favorite = doc.favorite;
+        }
     }
 
     Flickable {

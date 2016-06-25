@@ -10,6 +10,7 @@ Page {
     id: downloadPage
 
     property string issueId: ''
+    property string issueTitle: ''
     property string url: ''
     property string lang: ''
     property string path: ''
@@ -28,6 +29,7 @@ Page {
 
     Component.onCompleted: {
         readButton.visible = false;
+        openButton.visible = false;
 
         if (url) {
             var doc = u1db.getDoc(Utils.urlToId(url));
@@ -37,6 +39,7 @@ Page {
                 path = doc.path;
                 downloading = false;
                 readButton.visible = true;
+                openButton.visible = true;
             }
             else {
                 console.log('going to download file');
@@ -55,6 +58,7 @@ Page {
         onFinished: {
             downloadPage.path = path;
             readButton.visible = true;
+            openButton.visible = true;
 
             u1db.putDoc({
                 path: path,
@@ -102,6 +106,21 @@ Page {
 
                 text: i18n.tr('Read')
                 color: UbuntuColors.orange
+                //onClicked: pageStack.addPageToCurrentColumn(downloadPage, Qt.resolvedUrl('ReadPage.qml'), {
+                onClicked: PopupUtils.open(Qt.resolvedUrl('ReadPage.qml'), downloadPage, {
+                    path: downloadPage.path,
+                    title: i18n.tr('Reading: ') + downloadPage.issueTitle,
+                })
+            }
+
+            Button {
+                id: openButton
+                visible: false
+
+                Layout.fillWidth: true
+
+                text: i18n.tr('Open Externally')
+                //color: UbuntuColors.orange
                 onClicked: PopupUtils.open(openDialog, downloadPage, {'path': downloadPage.path});
             }
         }

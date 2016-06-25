@@ -3,5 +3,5 @@
   "app": "fullcircle",
   "sdk": "ubuntu-sdk-15.04",
   "arch": "armhf",
-  "template": "pure-qml-qmake"
+  "template": "qmake"
 }

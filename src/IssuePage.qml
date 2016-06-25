@@ -101,6 +101,7 @@ Page {
                         pageStack.addPageToCurrentColumn(issuePage, Qt.resolvedUrl("DownloadPage.qml"), {
                             title: i18n.tr('Downloading: ') + issuePage.title,
                             issueId: issuePage.issueId,
+                            issueTitle: issuePage.title,
                             url: modelData.link,
                             lang: modelData.lang
                         });

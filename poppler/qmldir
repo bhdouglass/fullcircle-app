@@ -1,0 +1,3 @@
+module Poppler
+ViewDelegate 1.0 ViewDelegate.qml
+plugin popplerPlugin

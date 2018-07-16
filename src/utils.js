@@ -22,10 +22,12 @@ function fetchIssues(callback) {
 
                         var downloads = [];
                         for (var lang in issue.links) {
-                            downloads.push({
-                                lang: lang,
-                                link: issue.links[lang],
-                            });
+                            if (lang) {
+                                downloads.push({
+                                    lang: lang,
+                                    link: issue.links[lang],
+                                });
+                            }
                         }
 
                         delete issue.links;

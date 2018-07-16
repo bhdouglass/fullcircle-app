@@ -93,7 +93,7 @@ Page {
 
                         Icon {
                             name: "next"
-                            Layout.fillHeight: true
+                            Layout.preferredHeight: units.gu(2)
                         }
                     }
 

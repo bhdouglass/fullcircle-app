@@ -10,7 +10,7 @@
             "content-hub": "fullcircle/fullcircle.content-hub"
         }
     },
-    "version": "3.00",
+    "version": "3.0.1",
     "maintainer": "Brian Douglass <bhdouglass@gmail.com>",
     "framework" : "ubuntu-sdk-15.04.4"
 }

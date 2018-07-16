@@ -85,8 +85,9 @@ MainView {
 
                     Label {
                         Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                        horizontalAlignment: Label.AlignHCenter
 
-                        text: i18n.tr('No favorites yet! Tap the star icon to save your favorite issues here.')
+                        text: i18n.tr('No favorites yet!\nTap the star icon to save your favorite issues here.')
                     }
                 }
             }

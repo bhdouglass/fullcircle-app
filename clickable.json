@@ -1,5 +1,6 @@
 {
   "template": "qmake",
+  "kill": "qmlscene",
   "dependencies": [
     "libpoppler-qt5-dev",
     "qtdeclarative5-private-dev",

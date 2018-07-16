@@ -68,10 +68,18 @@ Page {
         });
     }
 
-    Component.onCompleted: {
-        refreshIssues(); //Prepopulate any existing data before the network request comes back
-        refresh();
+    Timer {
+        id: refreshTimer
+        interval: 1000
+        repeat: false
+        onTriggered: {
+            refreshIssues(); //Prepopulate any existing data before the network request comes back
+            refresh();
+        }
     }
+
+    // Delay the refresh to allow the UI to render first
+    Component.onCompleted: refreshTimer.start()
 
     /*U1db.Database {
         id: metadatadb

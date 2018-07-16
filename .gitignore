@@ -35,3 +35,4 @@ Makefile*
 
 build*
 node_modules
+.clickable

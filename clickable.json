@@ -1,7 +1,8 @@
 {
-  "package": "fullcircle.bhdouglass",
-  "app": "fullcircle",
-  "sdk": "ubuntu-sdk-15.04",
-  "arch": "armhf",
-  "template": "qmake"
+  "template": "qmake",
+  "dependencies": [
+    "libpoppler-qt5-dev",
+    "qtdeclarative5-private-dev",
+    "qtbase5-private-dev"
+  ]
 }
